@@ -1,0 +1,173 @@
+{% extends "main.html" %}
+
+{% block content %}
+{% if alert %}
+    <div class="error">
+        <h1>Problem with loading data. Come back later or try to <a href="{{ url_for ('search_character_page') }}">refresh</a> page.</h1>
+    </div>
+{% else %}
+    <div class="char-container">
+        <div class="char-content">
+            <p class="title">Character Information</p>
+            <div class="char-content-parts">
+                <table class="details-char">
+                    <tr>
+                        <td><h6><span>Name:</span> </h6></td>
+                        <td><h6>{{ name.character.name }} {% if name.character.traded %} (traded) {% endif %}</h6></td>
+                    </tr>
+                    {% if name.character.former_names %}
+                    <tr>
+                        <td><h6><span>Former Names:</span></td>
+                        <td><h6>{% for item in name.character.former_names %} {{ item }} {% endfor %}</h6></td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td><h6><span>Sex:</span></h6></td>
+                        <td><h6>{{ name.character.sex }}</h6></td>
+                    </tr>
+                    <tr>
+                        <td><h6><span>Vocation:</span></h6></td>
+                        <td><h6>{{ name.character.vocation }}</h6></td>
+                    </tr>
+                    <tr>
+                        <td><h6><span>Level:</span></h6></td>
+                        <td><h6>{{ name.character.level }}</h6></td>
+                    </tr>
+                    <tr>
+                        <td><h6><span>Achievement Points:</span></h6></td>
+                        <td><h6>{{ name.character.achievement_points }}</h6></td>
+                    </tr>
+                    <tr>
+                        <td><h6><span>World:</span></h6></td>
+                        <td><h6>{{ name.character.world }}</h6></td>
+                    </tr>
+
+                    <tr>
+                        <td><h6><span>Residence:</span></h6></td>
+                        <td><h6>{{ name.character.residence }}</h6></td>
+                    </tr>
+                    {% if name.character.married_to %}
+                    <tr>
+                        <td><h6><span>Married to:</span></h6></td>
+                        <td><a class="underscore" href="{{ url_for('character_page',name=name['character']['married_to'])}}"><h6>{{ name.character.married_to }}</h6> </a></td>
+                        
+                    </tr>
+                    {% endif %}
+                    {% if name.character.comment %}
+                    <tr>
+                        <td><h6><span>Comment:</span></h6></td>
+                        <td ><h6>{{ name.character.comment | replace('\n', '<br>') | safe }}</h6></td>
+                    </tr>
+                    {% endif %}         
+                    <tr>
+                        <td><h6><span>Last Login:</span></h6></td>
+                        <td><h6>{% if  name.character.last_login %}{{ name.character.last_login | replace('T', ' ') | replace('Z', '') }} CET{% else %}Never logged in{% endif %}</h6></td>
+                    </tr>
+                    <tr>
+                        <td><h6><span>Account Status:</span> </h6></td>
+                        <td><h6> {{ name.character.account_status }}</h6></td>
+                    </tr>
+                    {% if name.account_information.created %}
+                    <tr>
+                        <td><h6><span>Created:</span></h6></td>
+                        <td><h6>{{ name.account_information.created | replace('T', ' ') | replace('Z', '') }} CET</h6></td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+            {% if name.deaths %}
+            <p class="title">Character Deaths</p>
+            <div class="char-content-parts">
+                <table class="death-table">
+                    {% for item in name.deaths %}
+                    <tr>
+                        <td class="bordered-cell-left"><h6>{{ item.time | replace('T', ' ') | replace('Z', '')}} CET</h6></td>
+                        <td class="bordered-cell-right">
+                            <h6>
+                                Died at Level {{ item.level }} by 
+                                {% for killer in item.killers %}
+                                    {% if not loop.last %}
+                                        {% if killer.player %}
+                                            <a class="underscore" href="{{ url_for('character_page',name=killer.name)}}">{{ killer.name }},</a>
+                                        {% else %}
+                                            {{ killer.name }},
+                                        {% endif %}
+                                    {% else %}
+                                        {% if killer.player %}
+                                            {% if loop.length >1 %}and{% endif %} <a class="underscore" href="{{ url_for('character_page',name=killer.name)}}">{{ killer.name }}.</a>
+                                        {% else %}
+                                        {% if loop.length >1 %}and{% endif %} {{ killer.name }}.
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </h6>
+                        </td>
+                    </tr>    
+                    {% endfor %}
+                </table>
+            </div>
+            {% endif %}
+
+
+            {% if name.other_characters %}
+            <p class="title">Characters</p>
+            <div class="char-content-parts">
+                <table class="char-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>World</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in name.other_characters %}
+                        <tr>
+                            <td><h6>{{ item.name }}</h6></td>
+                            <td><h6>{{ item.world }}</h6></td>
+                            <td class="{% if item.status == 'offline' %}offline{% else %}online{% endif %}"><h6>{{ item.status }}</h6></td>
+                            {% if item.name != name %}
+                            <td><a href="{{ url_for('character_page',name=item.name)}}"><h6>View</h6></a></td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+
+
+
+
+
+            {% if alert %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                Character <strong>{{ name }}</strong> does not exist.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            <p class="title">Search character</p>
+            <div class="search_guild">
+                <form class="row g-3" method="POST">
+                    <div class="col-auto">
+                        <h3>Character Name :</h3>
+                    </div>
+                    <div class="col-auto">
+                    <input type="text" class="form-control" id="inputPassword2" id="search_char_name" name="search_char_name" required>
+                    </div>
+                    <div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-3">Search</button>
+                    </div>
+                </form>
+            </div>
+
+
+
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

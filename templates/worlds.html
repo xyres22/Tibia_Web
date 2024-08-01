@@ -1,0 +1,47 @@
+{% extends "main.html" %}
+
+{% block content %}
+{% if alert %}
+  <div class="error">
+    <h1>Problem with loading data. Come back later or try to <a href="{{ url_for ('worlds_page') }}">refresh</a> page.</h1>
+  </div>
+{% else %}
+  <div class="content">
+      <!-- Your content goes here -->
+      <p class="title">Worlds</p>
+      <div class="all_worlds_info">
+        <h5>Players online: {{ players_online }}</h5>
+        <h5>Record: {{ record }} (on {{ record_date }})</h5>
+      </div>
+      <div class="char">
+        <table class="tablew">
+          <thead>
+            <tr>
+              <th>Worlds</th>
+              <th>Online</th>
+              <th>Location</th>
+              <th>Pvp Type</th>
+              <th>BattlEye</th>
+              <th>Additional Information</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for item in world_online_list.regular_worlds %}
+              <tr>
+                  <td><a href="{{ url_for('world_details', name=item.name) }}">{{ item.name }}</a></td>
+                  <td>{{ item.players_online }}</td>
+                  <td>{{ item.location }}</td>
+                  <td>{{ item.pvp_type }}</td>
+                  <td>{{ item.battleye_date }}</td>
+                  <td>{% if item.transfer_type == 'blocked' %} {{ item.transfer_type }}{% endif %}</td>
+              </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+  </div>
+
+{% endif %}
+
+
+{% endblock %}

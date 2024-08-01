@@ -1,0 +1,32 @@
+{% extends "main.html" %}
+
+{% block content %}
+{% if alert_page %}
+  <div class="error">
+    <h1>Problem with loading data. Come back later or try to <a href="{{ url_for ('search_character_page') }}">refresh</a> page.</h1>
+  </div>
+{% else %}
+{% if alert %}
+  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      Character <strong>{{ name }}</strong> does not exist.
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endif %}
+  <div class="content">
+      <p class="title">Search character</p>
+      <div class="search_guild">
+          <form class="row g-3" method="POST">
+              <div class="col-auto">
+                <h3>Character Name :</h3>
+              </div>
+              <div class="col-auto">
+                <input type="text" class="form-control" id="inputPassword2" id="search_char_name" name="search_char_name" required>
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-primary mb-3">Search</button>
+              </div>
+            </form>
+      </div>
+  </div>
+{% endif %}
+{% endblock %}

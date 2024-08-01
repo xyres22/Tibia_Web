@@ -1,0 +1,172 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="calc-container">
+      <div class="card" style="width: 18rem;">
+        <img src="{{ url_for('static', filename='images/stamina.jpg') }}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Stamina Calculator</h5>
+          <p class="card-text">Check how much time you need to regenerate stamina.</p>
+          <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#stamina">Calculate</a>
+        </div>
+      </div>
+      <div class="card" style="width: 18rem;">
+        <img src="{{ url_for('static', filename='images/shared.jpg') }}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Shared Exp Calc</h5>
+          <p class="card-text">Check with what levels you can share experience in party.</p>
+          <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Calculate</a>
+        </div>
+      </div>
+      <div class="card" style="width: 18rem;">
+        <img src="{{ url_for('static', filename='images/loot.jpg') }}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+          <a href="#" class="btn btn-primary">Go somewhere</a>
+        </div>
+      </div>
+      <!-- Shared Modal -->
+      <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="staticBackdropLabel">Shared Experience Calculator</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="clearInput()"></button>
+            </div>
+            <div class="modal-body">
+              <label for="numberInput" class="form-label">Enter level:</label>
+              <input type="number" class="form-control" id="numberInput">
+              <div id="result"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="clearInput()">Close</button>
+              <button type="button" class="btn btn-primary" onclick="calculateResult()">Calculate</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Stamina  Modal -->
+      <div class="modal fade" id="stamina" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staminaLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="staminaLabel">Stamina Calculator</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="clearInput()"></button>
+            </div>
+            <div class="modal-body">
+              <label for="staminaFrom" class="form-label">From:</label>
+              <input type="text" min="0" max="42" class="form-control" id="staminaFrom" placeholder="HH:MM">
+              <label for="staminaTo" class="form-label">To:</label>
+              <input type="text" class="form-control"  min="0" max="42" id="staminaTo" placeholder="HH:MM">
+              <div id="result1"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="clearInput()">Close</button>
+              <button type="button" class="btn btn-primary" onclick="validateStaminaFormat()">Calculate</button>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+<script>
+  function calculateResult() {
+    var inputValue = parseFloat(document.getElementById('numberInput').value);
+
+    if (!isNaN(inputValue) && parseFloat(inputValue) > 0) {
+
+      var high = Math.round((parseFloat(inputValue) / 2) + parseFloat(inputValue));
+      var low = Math.round((parseFloat(inputValue) / 3) * 2);
+
+      document.getElementById('result').innerHTML = 'A character with level <strong>'+ inputValue + '</strong> can share with levels <strong>' + low + '</strong> to <strong>' + high +'</strong>.';
+    } else {
+      document.getElementById('result').innerHTML = 'Please enter a valid positive number.';
+    }
+  }
+
+
+  function clearInput() {
+    document.getElementById('numberInput').value = '';
+    document.getElementById('result').innerHTML ='' ;
+    document.getElementById('staminaFrom').value ='' ;
+    document.getElementById('staminaTo').value ='' ;
+    document.getElementById('result1').innerHTML ='' ;
+  }
+</script>
+<script>
+  function addHoursAndMinutesToCurrentTime(hoursToAdd, minutesToAdd) {
+      var currentDate = new Date();
+
+      currentDate.setHours(currentDate.getHours() + hoursToAdd);
+      currentDate.setMinutes(currentDate.getMinutes() + minutesToAdd);
+
+      var weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      var weekdayIndex = currentDate.getDay();
+      var weekdayName = weekdays[weekdayIndex];
+      var formattedTime = currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit',hour12: false });
+
+      return weekdayName + ', ' + formattedTime;
+  }
+
+  function validateStaminaFormat() {
+    var staminaTo = document.getElementById('staminaTo').value.trim();
+    var staminaFrom = document.getElementById('staminaFrom').value.trim();
+
+    if (staminaFrom === '' || staminaTo === '') {
+      alert('Please enter both "From" and "To" values.');
+      return;
+    }
+
+    var regex = /^(0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-2]):[0-5][0-9]$/;
+
+    if (!regex.test(staminaFrom) || !regex.test(staminaTo)) {
+      alert('Invalid time format. Please use HH:MM.');
+      return;
+    }
+
+    calculateStamina(staminaFrom, staminaTo);
+  }
+
+  function calculateStamina(staminaFrom, staminaTo) {
+    var staminaFromArray = staminaFrom.split(':');
+    var staminaFromHour = parseInt(staminaFromArray[0]);
+    var staminaFromMinute = parseInt(staminaFromArray[1]);
+
+    var staminaToArray = staminaTo.split(':');
+    var staminaToHour = parseInt(staminaToArray[0]);
+    var staminaToMinute = parseInt(staminaToArray[1]);
+
+    var totalFrom = staminaFromHour * 60 + staminaFromMinute;
+    var totalTo = staminaToHour * 60 + staminaToMinute;
+
+
+    if (staminaFromHour > staminaToHour || (staminaFromHour === staminaToHour && staminaFromMinute > staminaToMinute)) {
+      document.getElementById('result1').innerHTML = '<strong>Invalid Format</strong>';
+    } else if (staminaFromHour === staminaToHour && staminaFromMinute === staminaToMinute) {
+      document.getElementById('result1').innerHTML = '<strong>Invalid Format</strong>';
+    } else if (staminaFromHour >= 39) {
+      var minutes = (totalTo - totalFrom) * 6 + 10;
+      var hours = Math.floor(minutes / 60);
+      minutes %= 60;
+      document.getElementById('result1').innerHTML = 'Time to regenerate <strong>' +hours + '</strong>:<strong>' + minutes +'</strong><br>'+ 
+      'It will be ready on <strong>'+ addHoursAndMinutesToCurrentTime(hours,minutes)+ '</strong';
+    } else if (staminaFromHour < 39 && staminaToHour < 39) {
+      var minutes = (totalTo - totalFrom) * 3 + 10;
+      var hours = Math.floor(minutes / 60);
+      minutes %= 60;
+      document.getElementById('result1').innerHTML = 'Time to regenerate <strong>' +hours + '</strong>:<strong>' + minutes +'</strong><br>'+ 
+      'It will be ready on <strong>'+ addHoursAndMinutesToCurrentTime(hours,minutes)+ '</strong';
+    } else {
+      var staminaChange = 39 * 60;
+      var toStaminaChange = (staminaChange - totalFrom) * 3;
+      var fromStaminaChange = (totalTo - staminaChange) * 6;
+      var totalStaminaChange = toStaminaChange + fromStaminaChange + 10;
+      var hours = Math.floor(totalStaminaChange / 60);
+      var minutes = totalStaminaChange % 60;
+      document.getElementById('result1').innerHTML = 'Time to regenerate <strong>' +hours + '</strong>:<strong>' + minutes +'</strong><br>'+ 
+      'It will be ready on <strong>'+ addHoursAndMinutesToCurrentTime(hours,minutes)+ '</strong';
+    }
+  }
+</script>
+
+{% endblock %}

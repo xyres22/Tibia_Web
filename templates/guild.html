@@ -1,0 +1,51 @@
+{% extends "main.html" %}
+
+{% block content %}
+{% if alert %}
+    <div class="error">
+        <h1>Problem with loading data. Come back later or try to <a href="{{ url_for ('search_guild') }}">refresh</a> page.</h1>
+    </div>
+{% else %}
+    <div class="content">
+        <!-- Your content goes here -->
+        <div class="guild-name">
+            <img class="guild-logo-left" src="{{ guild_info.logo_url }}">
+            <p class="title">{{ main_guild_name | title}}</p>
+            <img class="guild-logo-right" src="{{ guild_info.logo_url }}">
+        </div>
+        <div class="all_worlds_info">
+            <label>{% if guild_info != 'Invalid status' %}       {% if guild_info.description %} {{ guild_info.description }} {% else %}No description {% endif %}     {% else %}No data   {% endif %}</label>
+            <h6><span>Founded : </span>{{ guild_info.founded }} on {{ guild_info.world }}</h6>
+            <h6><span>Members Total : </span>{{ guild_info.members_total }} </h6>
+            <h6 class="{% if guild_info.players_online > 0 %}online{% endif %}"><span>Online : </span>{{ guild_info.players_online }}</h6>
+        </div>
+        <div class="char">
+        <table class="tablew">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name and Title</th>
+                    <th>Vocation</th>
+                    <th>Level</th>
+                    <th>Joining Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for item in guild_info.members %}
+                <tr>
+                    <td class="rank-style"> {{ item.rank }}</td>
+                    <td><a href="{{ url_for('character_page', name=item['name'])}}">{{ item.name }}</a><a href="{{ 'https://www.tibia.com/community/?name=' + item.name }}" target="_blank"> <img src="{{ url_for('static', filename='images/tibia.gif') }}" alt="Tibia.com"></a> {% if item.title %}({{ item.title }}){% endif %}</td>
+                    <td> {{ item.vocation }}</td>
+                    <td> {{ item.level }}</td>
+                    <td> {{ item.joined }}</td>
+                    <td class="{% if item.status == 'offline' %}offline{% else %}online {% endif %}"> {{ item.status }}</td>
+
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

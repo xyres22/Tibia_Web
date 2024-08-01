@@ -1,0 +1,108 @@
+{% extends "main.html" %}
+
+{% block content %}
+{% if alert %}
+  <div class="error">
+    <h1>Problem with loading data. Come back later or try to <a href="{{ url_for ('world_details', name=name) }}">refresh</a> page.</h1>
+  </div>
+{% else %}
+  <div class="content">
+      <!-- Your content goes here -->
+      <p class="title">{{ name }}</p>
+      <div class="all_worlds_info">
+        <h6 class="{% if world_table.status == 'offline' %}offline{% else %}online{% endif %}"><span>Status : </span> {{ world_table.status }}</h6>
+        <h6><span>Players online : </span> {{ world_table.players_online }}</h6>
+        <h6><span>Online Record : </span>{{ world_table.record_players }}</h6>
+        <h6><span>Creation Date : </span>{{ world_table.creation_date }}</h6>
+        <h6><span>Location : </span>{{ world_table.location }}</h6>
+        <h6><span>Pvp Type : </span>{{ world_table.pvp_type }}</h6>
+        <h6><span>Transfer Type : </span>{{ world_table.transfer_type | capitalize}}</h6>
+        <h6><span>World Titles : </span>
+            {% for item in world_table.world_quest_titles %}
+              {% if not loop.last %}
+                {{ item }},
+              {% else %}
+                {{ item }}.
+              {% endif %}
+            {% endfor %}
+        </h6> 
+        <h6><span>Game World Type : </span>{{ world_table.game_world_type | capitalize }}</h6>
+      </div>
+      <div class="char">
+        <table class="tablew">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Level</th>
+              <th>Vocation</th>
+              <th>Guild</th>
+            </tr>
+          </thead>
+          <tbody id="playerTable">
+          {% for item in world_table.online_players %}
+            <tr>
+              <td id="name"><a href="{{ url_for('character_page',name=item['name'])}}">{{ item.name }}</a><a href="{{ 'https://www.tibia.com/community/?name=' + item.name }}" target="_blank"> <img src="{{ url_for('static', filename='images/tibia.gif') }}" alt="Tibia.com"></a></td>
+              <td>{{ item.level }}</td>
+              <td>{{ item.vocation }}</td>
+              <td id="here"></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+  </div>
+  <script>
+    $('#playerTable tr').each(function() {
+      var playerName = $(this).find('td#name').text().trim();
+
+      $.ajax({
+        url: 'https://api.tibiadata.com/v4/character/' + playerName,
+        dataType: 'json',
+        success: function(data) {
+
+          if (data.character) {
+
+            if (data.character.character.guild && data.character.character.guild.rank && data.character.character.guild.name) {
+              var rank = data.character.character.guild.rank;
+              var guildName = data.character.character.guild.name;
+
+              // Dynamically generate the URL for the guild page
+              var guildPageUrl = '{{ url_for("guild_page", guild_name="", _external=True) }}';
+              
+              // Check if the URL ends with a slash and adjust accordingly
+              if (guildPageUrl.endsWith('/')) {
+                guildPageUrl += encodeURIComponent(guildName);
+              } else {
+                guildPageUrl += '/' + encodeURIComponent(guildName);
+              }
+
+              // Create a hyperlink for the guild name
+              var guildLink = $('<a>', {
+                href: guildPageUrl,
+                text: guildName
+              });
+
+              // Create a span for the rank and guild name
+              var rankAndGuildSpan = $('<span>', {
+                text: rank + ' of the '
+              }).append(guildLink);
+
+              // Update the 'here' column with the created span
+              $(this).find('td#here').html(rankAndGuildSpan);
+            } else {
+              // Guild information is not available
+              // Update the 'here' column with an empty string
+              $(this).find('td#here').text('');
+            }
+          }
+        }.bind(this),  // bind 'this' to maintain the reference to the current table row
+        error: function() {
+          console.log('bad');
+          console.error('Error fetching data for player: ' + playerName);
+        }
+      });
+    });
+  </script>
+{% endif %}
+
+{% endblock %}

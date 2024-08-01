@@ -1,0 +1,114 @@
+{% extends "main.html" %}
+
+{% block content %}
+{% if alert %}
+  <div class="error">
+    <h1>Problem with loading data. Come back later or try to <a href="{{ url_for ('index') }}">refresh</a> page.</h1>
+  </div>
+{% else %}
+  <div class="content">
+      <!-- Your content goes here -->
+      <p class="title">Tibia Highscores</p>
+      <div class="search">
+        <form method="POST">
+          <div class="search_opt">
+            <label for="world" >World</label>
+            <select name="world" id="world">
+              <option value="all">All worlds</option>
+            {% for item in wrld %}
+              <option {% if item == selected_world %}selected{% endif %} >{{ item }}</option>
+            {% endfor %}
+            </select>
+          </div>
+          <div class="search_opt">
+            <label>Category</label>
+            <select name="category" id="category">
+              {% for item in cat_list %}
+                <option value="{{ item }}" {% if item == selected_cat %}selected{% endif %}>{{ item }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="search_opt">
+            <label>Vocation</label>
+            <select name="vocation" id="vocation">
+              <option value="all">(all)</option>
+              {% for item in voc_list %}
+              <option {% if item == selected_voc %}selected{% endif %}>{{ item }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <br>
+          <div class="submit_btn">
+            <button class="search_btn" type="submit" value="Submit">Submit</button>
+          </div>
+          
+        </form>
+      </div>
+      <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+          <li class="page-item {% if selected_page == 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('index', world=selected_world, category=selected_cat, vocation=selected_voc, page=selected_page-1) }}" tabindex="-1" aria-disabled="true">Previous</a>
+          </li>
+          {% for page_num in range(1, 21) %}
+            <li class="page-item {% if page_num == selected_page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('index', world=selected_world, category=selected_cat, vocation=selected_voc, page=page_num) }}">{{ page_num }}</a>
+            </li>
+          {% endfor %}
+          <li class="page-item {% if selected_page == 20 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('index', world=selected_world, category=selected_cat, vocation=selected_voc, page=selected_page+1) }}">Next</a>
+          </li>
+        </ul>
+      </nav>
+      <div class="char">
+        <table class="tablew">
+          <thead>
+            <tr>
+              <th style="width:25px;">Rank</th>
+              <th>Name</th>
+              <th>Vocation</th>
+              <th>World</th>
+              <th>Level</th>
+              <th>
+                {% if selected_cat in ['Magic Level', 'Shielding','Axe Fighting','Club Fighting','Distance Fighting','Fishing','Fist Fighting','Sword Fighting'] %}
+                    Skill Level
+                {% else %}
+                    Points
+                {% endif %}
+            </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in lst %}
+              <tr>
+
+                <td class="rank">{{ item['rank'] }}</td>
+                <td><a href="{{ url_for('character_page' ,name=item['name'])}}">{{ item['name'] }}</a><a href="{{ 'https://www.tibia.com/community/?name=' + item['name'] }}" target="_blank"> <img src="{{ url_for('static', filename='images/tibia.gif') }}" alt="Tibia.com"></a></td>
+
+                <td>{{ item['vocation'] }}</td>
+                <td>{{ item['world'] }}</td>
+                <td>{{ item['level'] }}</td>
+                <td>{{ '{:,.0f}'.format(item['value']|int) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <nav aria-label="Page navigation example">
+          <ul class="pagination justify-content-center">
+            <li class="page-item {% if selected_page == 1 %}disabled{% endif %}">
+              <a class="page-link" href="{{ url_for('index', world=selected_world, category=selected_cat, vocation=selected_voc, page=selected_page-1) }}" tabindex="-1" aria-disabled="true">Previous</a>
+            </li>
+            {% for page_num in range(1, 21) %}
+              <li class="page-item {% if page_num == selected_page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('index', world=selected_world, category=selected_cat, vocation=selected_voc, page=page_num) }}">{{ page_num }}</a>
+              </li>
+            {% endfor %}
+            <li class="page-item {% if selected_page == 20 %}disabled{% endif %}">
+              <a class="page-link" href="{{ url_for('index', world=selected_world, category=selected_cat, vocation=selected_voc, page=selected_page+1) }}">Next</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+  </div>
+{% endif %}
+{% endblock %}
